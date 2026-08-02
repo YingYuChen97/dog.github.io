@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PawWalk - 遛狗媒合平台</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:"Microsoft JhengHei",sans-serif;
+}
+
+body{
+    background:#f8f9fa;
+}
+
+header{
+    background:#ff914d;
+    color:white;
+    padding:20px 8%;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+header h1{
+    font-size:30px;
+}
+
+nav a{
+    color:white;
+    text-decoration:none;
+    margin-left:25px;
+    font-weight:bold;
+}
+
+.hero{
+    height:500px;
+    background-image:url("https://source.unsplash.com/1600x900/?dog,park");
+    background-size:cover;
+    background-position:center;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.hero-text{
+    background:rgba(255,255,255,.8);
+    padding:40px;
+    border-radius:20px;
+    text-align:center;
+}
+
+.hero-text h2{
+    font-size:40px;
+    color:#ff7b00;
+    margin-bottom:15px;
+}
+
+.hero-text p{
+    font-size:20px;
+    margin-bottom:25px;
+}
+
+.btn{
+    background:#ff914d;
+    color:white;
+    padding:15px 30px;
+    border-radius:30px;
+    text-decoration:none;
+    font-size:18px;
+}
+
+.section{
+    width:90%;
+    max-width:1200px;
+    margin:60px auto;
+}
+
+.section h2{
+    text-align:center;
+    margin-bottom:35px;
+    color:#444;
+}
+
+.cards{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+    gap:30px;
+}
+
+.card{
+    background:white;
+    border-radius:15px;
+    overflow:hidden;
+    box-shadow:0 5px 15px rgba(0,0,0,.15);
+    transition:.3s;
+}
+
+.card:hover{
+    transform:translateY(-8px);
+}
+
+.card img{
+    width:100%;
+    height:220px;
+    object-fit:cover;
+}
+
+.card-content{
+    padding:20px;
+}
+
+.card-content h3{
+    color:#ff914d;
+    margin-bottom:10px;
+}
+
+.card-content p{
+    color:#555;
+    line-height:1.6;
+}
+
+.feature{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:25px;
+    text-align:center;
+}
+
+.box{
+    background:white;
+    padding:30px;
+    border-radius:15px;
+    box-shadow:0 5px 15px rgba(0,0,0,.1);
+}
+
+.box h3{
+    color:#ff914d;
+    margin:15px 0;
+}
+
+footer{
+    margin-top:60px;
+    background:#333;
+    color:white;
+    text-align:center;
+    padding:30px;
+}
+</style>
+
+</head>
+<body>
+
+<header>
+    <h1>🐶 PawWalk</h1>
+
+    <nav>
+        <a href="#">首頁</a>
+        <a href="#">尋找遛狗員</a>
+        <a href="#">成為遛狗員</a>
+        <a href="#">登入</a>
+    </nav>
+</header>
+
+<section class="hero">
+
+<div class="hero-text">
+    <h2>找到最適合的遛狗夥伴</h2>
+    <p>主人安心上班，狗狗快樂散步。</p>
+    <a class="btn" href="#">立即開始</a>
+</div>
+
+</section>
+
+<section class="section">
+
+<h2>今日可愛狗狗</h2>
+
+<div class="cards">
+
+<div class="card">
+<img src="images/sample1.jpg" alt="sample1">
+<div class="card-content">
+<h3>Lucky 🐕</h3>
+<p>
+黃金獵犬，3歲。<br>
+喜歡公園散步、愛玩球。
+</p>
+</div>
+</div>
+
+<div class="card">
+<img src="images/sample2.jpg" alt="sample1">
+<div class="card-content">
+<h3>Cookie 🐶</h3>
+<p>
+柯基犬，2歲。<br>
+喜歡慢跑和吃零食。
+</p>
+</div>
+</div>
+
+<div class="card">
+<img src="images/sample3.jpg" alt="sample1">
+<div class="card-content">
+<h3>Mochi 🐕</h3>
+<p>
+柴犬，4歲。<br>
+喜歡探索新地方。
+</p>
+</div>
+</div>
+
+</div>
+
+</section>
+
+<section class="section">
+
+<h2>平台特色</h2>
+
+<div class="feature">
+
+<div class="box">
+<h3>👨‍💼 忙碌主人</h3>
+<p>
+快速找到值得信任的遛狗員。
+</p>
+</div>
+
+<div class="box">
+<h3>🐾 熱愛狗狗的人</h3>
+<p>
+利用空閒時間陪伴毛孩，也能賺取收入。
+</p>
+</div>
+
+<div class="box">
+<h3>⭐ 評價制度</h3>
+<p>
+雙方互相評價，建立安心可靠的平台。
+</p>
+</div>
+
+</div>
+
+</section>
+
+<footer>
+
+<p>
+© 2026 PawWalk 遛狗媒合平台
+</p>
+
+</footer>
+
+</body>
+</html>
