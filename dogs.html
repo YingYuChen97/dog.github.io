@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>更多狗狗 - PawWalk</title>
+<link rel="stylesheet" href="css/auth.css">
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:"Microsoft JhengHei",sans-serif;
+}
+
+body{
+    background:#f8f9fa;
+}
+
+header{
+    background:#ff914d;
+    color:white;
+    padding:20px 8%;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+header h1{
+    font-size:30px;
+}
+
+header h1 a{
+    color:white;
+    text-decoration:none;
+}
+
+nav a{
+    color:white;
+    text-decoration:none;
+    margin-left:25px;
+    font-weight:bold;
+}
+
+.page-hero{
+    background:linear-gradient(135deg,#fff4eb,#ffe0c2);
+    padding:48px 8% 36px;
+    text-align:center;
+}
+
+.page-hero h2{
+    color:#ff7b00;
+    font-size:32px;
+    margin-bottom:10px;
+}
+
+.page-hero p{
+    color:#666;
+    font-size:18px;
+}
+
+.section{
+    width:90%;
+    max-width:1200px;
+    margin:40px auto 60px;
+}
+
+.toolbar{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    justify-content:center;
+    margin-bottom:30px;
+}
+
+.toolbar select,
+.toolbar button{
+    font:inherit;
+    padding:10px 16px;
+    border-radius:10px;
+    border:1px solid #ddd;
+    background:white;
+    color:#444;
+    cursor:pointer;
+}
+
+.toolbar button{
+    background:#ff914d;
+    color:white;
+    border-color:#ff914d;
+    font-weight:bold;
+}
+
+.toolbar button.ghost{
+    background:white;
+    color:#ff914d;
+}
+
+.cards{
+    display:flex;
+    flex-wrap:wrap;
+    gap:30px;
+    justify-content:flex-start;
+    align-items:stretch;
+}
+
+.card{
+    width:280px;
+    max-width:100%;
+    flex:0 0 280px;
+    background:white;
+    border-radius:15px;
+    overflow:hidden;
+    box-shadow:0 5px 15px rgba(0,0,0,.15);
+    transition:.3s;
+}
+
+.card-link{
+    display:block;
+    color:inherit;
+    text-decoration:none;
+    cursor:pointer;
+}
+
+.card:hover{
+    transform:translateY(-8px);
+}
+
+.card img{
+    width:100%;
+    height:220px;
+    object-fit:cover;
+}
+
+.card-content{
+    padding:20px;
+}
+
+.card-content h3{
+    color:#ff914d;
+    margin:0;
+}
+
+.card-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    margin-bottom:8px;
+}
+
+.meta-pill{
+    background:#fff4eb;
+    color:#ff7b00;
+    font-size:13px;
+    padding:4px 10px;
+    border-radius:999px;
+    white-space:nowrap;
+}
+
+.breed-line{
+    color:#777;
+    font-size:14px;
+    margin-bottom:12px;
+}
+
+.tag-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    margin-bottom:12px;
+}
+
+.tag{
+    background:#f1f3f5;
+    color:#555;
+    font-size:12px;
+    padding:4px 8px;
+    border-radius:6px;
+}
+
+.card-content p{
+    color:#555;
+    line-height:1.6;
+    margin-bottom:12px;
+}
+
+.dog-meta{
+    list-style:none;
+    border-top:1px solid #f0f0f0;
+    padding-top:12px;
+}
+
+.dog-meta li{
+    color:#555;
+    font-size:14px;
+    line-height:1.5;
+    margin-bottom:8px;
+}
+
+.dog-meta strong{
+    display:inline-block;
+    min-width:42px;
+    color:#888;
+    margin-right:6px;
+}
+
+.empty-hint{
+    text-align:center;
+    color:#888;
+    width:100%;
+    padding:40px 0;
+}
+
+.back-row{
+    text-align:center;
+    margin-top:40px;
+}
+
+.btn{
+    background:#ff914d;
+    color:white;
+    padding:12px 28px;
+    border-radius:30px;
+    text-decoration:none;
+    font-size:16px;
+    display:inline-block;
+}
+
+footer{
+    margin-top:60px;
+    background:#333;
+    color:white;
+    text-align:center;
+    padding:30px;
+}
+
+@media (max-width:640px){
+    header{
+        flex-direction:column;
+        gap:12px;
+        text-align:center;
+    }
+    nav a{
+        margin:0 10px;
+    }
+    .card{
+        flex:0 0 min(280px,100%);
+        width:min(280px,100%);
+    }
+}
+</style>
+</head>
+<body>
+
+<header>
+    <h1><a href="index.html">🐶 PawWalk</a></h1>
+    <nav id="main-nav">
+        <a href="index.html">首頁</a>
+        <a href="dogs.html">可愛狗狗</a>
+        <a href="community.html">狗社群</a>
+        <span data-auth-slot></span>
+    </nav>
+</header>
+
+<section class="page-hero">
+    <h2>更多可愛狗狗</h2>
+    <p>依地區、體型與活力篩選，找到你想陪伴的毛孩。</p>
+</section>
+
+<section class="section">
+    <div class="toolbar">
+        <label>
+            地區
+            <select id="filter-location">
+                <option value="">全部</option>
+            </select>
+        </label>
+        <label>
+            體型
+            <select id="filter-size">
+                <option value="">全部</option>
+                <option value="小型">小型</option>
+                <option value="中型">中型</option>
+                <option value="大型">大型</option>
+            </select>
+        </label>
+        <label>
+            活力
+            <select id="filter-energy">
+                <option value="">全部</option>
+                <option value="低">低</option>
+                <option value="中">中</option>
+                <option value="高">高</option>
+            </select>
+        </label>
+        <button type="button" id="apply-filters">套用篩選</button>
+        <button type="button" class="ghost" id="reset-filters">清除</button>
+    </div>
+
+    <div class="cards" id="dogs-list"></div>
+
+    <div class="back-row">
+        <a class="btn" href="index.html">回首頁</a>
+    </div>
+</section>
+
+<footer>
+    <p>© 2026 PawWalk 遛狗媒合平台</p>
+</footer>
+
+<script src="js/listings.js"></script>
+<script src="data/dogs.js"></script>
+<script src="js/dogs-ui.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/nav-auth.js"></script>
+<script>
+(function () {
+    const list = document.getElementById("dogs-list");
+    const locSel = document.getElementById("filter-location");
+    const sizeSel = document.getElementById("filter-size");
+    const energySel = document.getElementById("filter-energy");
+
+    const locations = [...new Set(DogData.all().map((d) => d.location))].sort();
+    locations.forEach((loc) => {
+        const opt = document.createElement("option");
+        opt.value = loc;
+        opt.textContent = loc;
+        locSel.appendChild(opt);
+    });
+
+    function apply() {
+        const loc = locSel.value;
+        const size = sizeSel.value;
+        const energy = energySel.value;
+        const dogs = DogData.all().filter((d) => {
+            if (loc && d.location !== loc) return false;
+            if (size && d.size !== size) return false;
+            if (energy && d.energy !== energy) return false;
+            return true;
+        });
+        DogsUI.render(list, dogs, "detail");
+    }
+
+    document.getElementById("apply-filters").addEventListener("click", apply);
+    document.getElementById("reset-filters").addEventListener("click", () => {
+        locSel.value = "";
+        sizeSel.value = "";
+        energySel.value = "";
+        apply();
+    });
+
+    apply();
+})();
+</script>
+</body>
+</html>
