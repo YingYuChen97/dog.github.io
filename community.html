@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>狗社群 - PawWalk</title>
+<link rel="stylesheet" href="css/auth.css">
+<link rel="stylesheet" href="css/community.css">
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:"Microsoft JhengHei",sans-serif;
+}
+body{ background:#f8f9fa; }
+header{
+    background:#ff914d;
+    color:white;
+    padding:20px 8%;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+header h1{ font-size:30px; }
+header h1 a{ color:white; text-decoration:none; }
+nav a{
+    color:white;
+    text-decoration:none;
+    margin-left:25px;
+    font-weight:bold;
+}
+footer{
+    background:#333;
+    color:white;
+    text-align:center;
+    padding:30px;
+}
+@media (max-width:640px){
+    header{ flex-direction:column; gap:12px; text-align:center; }
+    nav a{ margin:0 10px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+    <h1><a href="index.html">🐶 PawWalk</a></h1>
+    <nav id="main-nav">
+        <a href="index.html">首頁</a>
+        <a href="dogs.html">可愛狗狗</a>
+        <a href="community.html">狗社群</a>
+        <span data-auth-slot></span>
+    </nav>
+</header>
+
+<main class="community-page">
+    <div class="community-wrap">
+        <div class="community-hero">
+            <h2>狗社群</h2>
+            <p>分享毛孩日常，替可愛瞬間按讚與留言。</p>
+        </div>
+
+        <section class="composer" id="composer">
+            <h3>分享狗狗照片</h3>
+            <div class="msg" id="compose-msg"></div>
+            <div id="composer-body"></div>
+        </section>
+
+        <section id="feed"></section>
+    </div>
+</main>
+
+<footer>
+    <p>© 2026 PawWalk 遛狗媒合平台</p>
+</footer>
+
+<script src="js/auth.js"></script>
+<script src="js/community.js"></script>
+<script src="js/nav-auth.js"></script>
+<script>
+(function () {
+    const feedEl = document.getElementById("feed");
+    const composerBody = document.getElementById("composer-body");
+    const composeMsg = document.getElementById("compose-msg");
+    let pendingImage = "";
+
+    function escapeHtml(str) {
+        return String(str)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;");
+    }
+
+    function showMsg(el, text, ok) {
+        el.textContent = text;
+        el.className = "msg show " + (ok ? "ok" : "err");
+    }
+
+    function clearMsg(el) {
+        el.className = "msg";
+        el.textContent = "";
+    }
+
+    function timeAgo(iso) {
+        const t = new Date(iso).getTime();
+        if (!t) return "";
+        const diff = Math.max(0, Date.now() - t);
+        const m = Math.floor(diff / 60000);
+        if (m < 1) return "剛剛";
+        if (m < 60) return m + " 分鐘前";
+        const h = Math.floor(m / 60);
+        if (h < 24) return h + " 小時前";
+        const d = Math.floor(h / 24);
+        if (d < 7) return d + " 天前";
+        return new Date(iso).toLocaleDateString("zh-TW");
+    }
+
+    function renderComposer() {
+        const user = Auth.currentUser();
+        if (!user) {
+            composerBody.innerHTML = `
+                <p class="composer-locked">
+                    登入後可以按讚、留言。<br>
+                    狗主人登入後還能分享狗狗照片。<br>
+                    <a href="login.html">前往登入</a> 或 <a href="register.html">註冊</a>
+                </p>
+            `;
+            return;
+        }
+
+        if (user.role !== "owner") {
+            composerBody.innerHTML = `
+                <p class="composer-locked">
+                    嗨 ${escapeHtml(user.name)}！你可以瀏覽動態、按讚與留言。<br>
+                    發文功能目前開放給狗主人使用。
+                </p>
+            `;
+            return;
+        }
+
+        composerBody.innerHTML = `
+            <form id="compose-form">
+                <div class="form-row">
+                    <label for="dog-name">狗狗名字（選填）</label>
+                    <input id="dog-name" maxlength="30" placeholder="例如：Lucky">
+                </div>
+                <div class="form-row">
+                    <label for="caption">分享內容</label>
+                    <textarea id="caption" maxlength="500" required placeholder="寫下今天的毛孩日常…"></textarea>
+                </div>
+                <div class="form-row">
+                    <label for="image-select">選擇樣張</label>
+                    <select id="image-select">
+                        <option value="images/sample1.jpg">樣張 1</option>
+                        <option value="images/sample2.jpg">樣張 2</option>
+                        <option value="images/sample3.jpg">樣張 3</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label for="image-file">或上傳照片</label>
+                    <input id="image-file" type="file" accept="image/*">
+                </div>
+                <div class="preview-box show" id="preview-box">
+                    <img id="preview-img" src="images/sample1.jpg" alt="預覽">
+                </div>
+                <div class="composer-actions">
+                    <button class="btn-post" type="submit" id="post-btn">發布</button>
+                    <span class="hint">上傳檔案建議小於 1MB</span>
+                </div>
+            </form>
+        `;
+
+        pendingImage = "images/sample1.jpg";
+        const select = document.getElementById("image-select");
+        const fileInput = document.getElementById("image-file");
+        const preview = document.getElementById("preview-img");
+
+        select.addEventListener("change", () => {
+            pendingImage = select.value;
+            preview.src = pendingImage;
+            fileInput.value = "";
+        });
+
+        fileInput.addEventListener("change", () => {
+            const file = fileInput.files && fileInput.files[0];
+            if (!file) return;
+            if (file.size > 1024 * 1024) {
+                showMsg(composeMsg, "圖片太大，請選擇 1MB 以內的檔案。", false);
+                fileInput.value = "";
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = () => {
+                pendingImage = String(reader.result || "");
+                preview.src = pendingImage;
+                clearMsg(composeMsg);
+            };
+            reader.readAsDataURL(file);
+        });
+
+        document.getElementById("compose-form").addEventListener("submit", (e) => {
+            e.preventDefault();
+            clearMsg(composeMsg);
+            const btn = document.getElementById("post-btn");
+            btn.disabled = true;
+            const result = Community.createPost({
+                authorId: user.id,
+                authorName: user.name,
+                dogName: document.getElementById("dog-name").value,
+                caption: document.getElementById("caption").value,
+                image: pendingImage
+            });
+            btn.disabled = false;
+            if (!result.ok) {
+                showMsg(composeMsg, result.error, false);
+                return;
+            }
+            showMsg(composeMsg, "發布成功！", true);
+            document.getElementById("caption").value = "";
+            document.getElementById("dog-name").value = "";
+            renderFeed();
+        });
+    }
+
+    function renderFeed() {
+        const user = Auth.currentUser();
+        const posts = Community.all();
+
+        if (!posts.length) {
+            feedEl.innerHTML = `<p class="feed-empty">還沒有貼文，當第一個分享的人吧！</p>`;
+            return;
+        }
+
+        feedEl.innerHTML = posts.map((post) => {
+            const liked = user && (post.likedBy || []).includes(user.id);
+            const likeCount = (post.likedBy || []).length;
+            const canDelete = user && user.id === post.authorId;
+            const comments = post.comments || [];
+
+            return `
+                <article class="post-card" data-id="${escapeHtml(post.id)}">
+                    <div class="post-header">
+                        <div class="post-avatar">${escapeHtml((post.authorName || "?").slice(0, 1))}</div>
+                        <div class="post-meta">
+                            <div class="name">${escapeHtml(post.authorName || "匿名")}</div>
+                            <div class="sub">${post.dogName ? escapeHtml(post.dogName) + " · " : ""}${escapeHtml(timeAgo(post.createdAt))}</div>
+                        </div>
+                        ${canDelete ? `<button type="button" class="post-delete" data-delete="${escapeHtml(post.id)}">刪除</button>` : ""}
+                    </div>
+                    <img class="post-image" src="${escapeHtml(post.image)}" alt="${escapeHtml(post.dogName || "狗狗照片")}">
+                    <div class="post-actions">
+                        <button type="button" class="action-btn ${liked ? "liked" : ""}" data-like="${escapeHtml(post.id)}" aria-label="按讚">${liked ? "♥" : "♡"}</button>
+                        <button type="button" class="action-btn" data-focus-comment="${escapeHtml(post.id)}" aria-label="留言">💬</button>
+                    </div>
+                    <div class="post-body">
+                        <div class="like-count">${likeCount} 個讚</div>
+                        <div class="caption">
+                            <span class="author">${escapeHtml(post.authorName || "匿名")}</span>${escapeHtml(post.caption)}
+                        </div>
+                        <div class="comments">
+                            ${comments.map((c) => `
+                                <div class="comment">
+                                    <span class="who">${escapeHtml(c.userName)}</span>${escapeHtml(c.text)}
+                                </div>
+                            `).join("")}
+                        </div>
+                        <form class="comment-form" data-comment-form="${escapeHtml(post.id)}">
+                            <input type="text" maxlength="200" placeholder="${user ? "新增留言…" : "登入後即可留言"}" ${user ? "" : "disabled"}>
+                            <button type="submit" ${user ? "" : "disabled"}>發布</button>
+                        </form>
+                    </div>
+                </article>
+            `;
+        }).join("");
+    }
+
+    feedEl.addEventListener("click", (e) => {
+        const likeBtn = e.target.closest("[data-like]");
+        const delBtn = e.target.closest("[data-delete]");
+        const focusBtn = e.target.closest("[data-focus-comment]");
+        const user = Auth.currentUser();
+
+        if (likeBtn) {
+            if (!user) {
+                window.location.href = "login.html";
+                return;
+            }
+            const result = Community.toggleLike(likeBtn.getAttribute("data-like"), user.id);
+            if (!result.ok) {
+                alert(result.error);
+                return;
+            }
+            renderFeed();
+            return;
+        }
+
+        if (delBtn) {
+            if (!confirm("確定刪除這則貼文？")) return;
+            const result = Community.removePost(delBtn.getAttribute("data-delete"), user && user.id);
+            if (!result.ok) {
+                alert(result.error);
+                return;
+            }
+            renderFeed();
+            return;
+        }
+
+        if (focusBtn) {
+            const id = focusBtn.getAttribute("data-focus-comment");
+            const input = feedEl.querySelector(`[data-comment-form="${id}"] input`);
+            if (input && !input.disabled) input.focus();
+            else if (!user) window.location.href = "login.html";
+        }
+    });
+
+    feedEl.addEventListener("submit", (e) => {
+        const form = e.target.closest("[data-comment-form]");
+        if (!form) return;
+        e.preventDefault();
+        const user = Auth.currentUser();
+        if (!user) {
+            window.location.href = "login.html";
+            return;
+        }
+        const input = form.querySelector("input");
+        const result = Community.addComment(form.getAttribute("data-comment-form"), {
+            userId: user.id,
+            userName: user.name,
+            text: input.value
+        });
+        if (!result.ok) {
+            alert(result.error);
+            return;
+        }
+        renderFeed();
+    });
+
+    renderComposer();
+    renderFeed();
+})();
+</script>
+</body>
+</html>
