@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>遛狗員中心 - PawWalk</title>
+<link rel="stylesheet" href="css/auth.css">
+<link rel="stylesheet" href="css/walks.css">
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:"Microsoft JhengHei",sans-serif;
+}
+html{ scroll-behavior:smooth; }
+body{ background:#f8f9fa; }
+header{
+    background:#ff914d;
+    color:white;
+    padding:20px 8%;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+header h1{ font-size:30px; }
+header h1 a{ color:white; text-decoration:none; }
+nav a{
+    color:white;
+    text-decoration:none;
+    margin-left:25px;
+    font-weight:bold;
+}
+.page-hero{
+    background:linear-gradient(135deg,#fff4eb,#ffe0c2);
+    padding:40px 8% 28px;
+}
+.page-hero h2{ color:#ff7b00; font-size:30px; margin-bottom:8px; }
+.page-hero p{ color:#666; font-size:16px; }
+.section{ width:90%; max-width:1100px; margin:36px auto; }
+.panel{
+    background:white;
+    border-radius:16px;
+    box-shadow:0 5px 15px rgba(0,0,0,.1);
+    padding:28px;
+    margin-bottom:28px;
+    scroll-margin-top:96px;
+}
+.panel h3{ color:#444; margin-bottom:6px; font-size:22px; }
+.panel .hint{ color:#888; font-size:14px; margin-bottom:20px; }
+.tabs{ display:flex; flex-wrap:wrap; gap:10px; margin:-8px 0 28px; }
+.tabs a{
+    text-decoration:none;
+    color:#ff7b00;
+    background:#fff4eb;
+    padding:8px 14px;
+    border-radius:999px;
+    font-size:14px;
+    font-weight:bold;
+    transition:background .2s, color .2s;
+}
+.tabs a:hover,.tabs a.is-active{ background:#ff914d; color:white; }
+.form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px 18px; }
+.form-group label{
+    display:block; margin-bottom:6px; color:#444; font-weight:bold; font-size:14px;
+}
+.form-group input{
+    width:100%; padding:12px 14px; border:1px solid #ddd; border-radius:10px; font:inherit;
+}
+.readonly{ background:#f8f9fa; color:#666; }
+.form-actions{ display:flex; flex-wrap:wrap; gap:10px; margin-top:12px; }
+.btn-primary,.btn-secondary,.btn-danger{
+    border:none; border-radius:30px; padding:10px 18px; font:inherit; font-weight:bold; cursor:pointer;
+}
+.btn-primary{ background:#ff914d; color:white; }
+.btn-secondary{ background:#f1f3f5; color:#444; }
+.btn-danger{ background:#fff0f0; color:#c0392b; }
+.msg{ border-radius:8px; padding:10px 12px; margin-bottom:14px; font-size:14px; display:none; }
+.msg.show{ display:block; }
+.msg.ok{ background:#eefaf1; color:#1e7e34; border:1px solid #c3e6cb; }
+.msg.err{ background:#fff0f0; color:#c0392b; border:1px solid #f5c6cb; }
+.empty{ text-align:center; color:#888; padding:28px 10px; }
+footer{ margin-top:40px; background:#333; color:white; text-align:center; padding:30px; }
+@media (max-width:720px){
+    header{ flex-direction:column; gap:12px; text-align:center; }
+    nav a{ margin:0 10px; }
+    .form-grid{ grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+
+<header>
+    <h1><a href="index.html">🐶 PawWalk</a></h1>
+    <nav id="main-nav">
+        <a href="index.html">首頁</a>
+        <a href="dogs.html">可愛狗狗</a>
+        <a href="community.html">狗社群</a>
+        <a href="walker.html">遛狗員中心</a>
+        <span data-auth-slot></span>
+    </nav>
+</header>
+
+<section class="page-hero">
+    <h2 id="welcome-title">遛狗員中心</h2>
+    <p>管理申請、完成行程並留下評價。</p>
+    <p class="rating-summary" id="rating-summary"></p>
+</section>
+
+<section class="section">
+    <div class="tabs">
+        <a href="#section-walks">我的申請</a>
+        <a href="#section-settings">基本設定</a>
+        <a href="dogs.html">去找狗狗</a>
+    </div>
+
+    <div class="panel" id="section-walks">
+        <h3>我的申請／行程</h3>
+        <p class="hint">待審核可取消；已接單可標記完成；完成後可評價主人。</p>
+        <div class="walk-list" id="walk-list"></div>
+    </div>
+
+    <div class="panel" id="section-settings">
+        <h3>基本設定</h3>
+        <p class="hint">更新個人資料與密碼。</p>
+        <div class="msg" id="profile-msg"></div>
+        <form id="profile-form">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="profile-name">名稱</label>
+                    <input id="profile-name" required maxlength="40">
+                </div>
+                <div class="form-group">
+                    <label for="profile-email">Email</label>
+                    <input id="profile-email" class="readonly" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="profile-phone">聯絡電話</label>
+                    <input id="profile-phone" maxlength="20">
+                </div>
+                <div class="form-group">
+                    <label for="profile-area">常活動地區</label>
+                    <input id="profile-area" placeholder="例如：台北市大安區">
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">儲存資料</button>
+            </div>
+        </form>
+
+        <hr style="border:none;border-top:1px solid #eee;margin:28px 0;">
+        <h3 style="font-size:18px;margin-bottom:14px;">修改密碼</h3>
+        <div class="msg" id="password-msg"></div>
+        <form id="password-form">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="current-password">目前密碼</label>
+                    <input id="current-password" type="password" required>
+                </div>
+                <div class="form-group">
+                    <label for="new-password">新密碼（至少 6 碼）</label>
+                    <input id="new-password" type="password" required minlength="6">
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">更新密碼</button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<footer>
+    <p>© 2026 PawWalk 遛狗媒合平台</p>
+</footer>
+
+<script src="js/auth.js"></script>
+<script src="js/walks.js"></script>
+<script src="js/nav-auth.js"></script>
+<script>
+(function () {
+    const user = Auth.currentUser();
+    if (!user) {
+        window.location.href = "login.html";
+        return;
+    }
+    if (user.role !== "walker") {
+        alert("此頁面僅供遛狗員使用。");
+        window.location.href = user.role === "owner" ? "owner.html" : "index.html";
+        return;
+    }
+
+    document.getElementById("welcome-title").textContent = user.name + " 的遛狗員中心";
+
+    function escapeHtml(str) {
+        return String(str == null ? "" : str)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;");
+    }
+
+    function showMsg(el, text, ok) {
+        el.textContent = text;
+        el.className = "msg show " + (ok ? "ok" : "err");
+    }
+
+    function clearMsg(el) {
+        el.className = "msg";
+        el.textContent = "";
+    }
+
+    function refreshRating() {
+        const s = Walks.ratingSummary(user.id);
+        const el = document.getElementById("rating-summary");
+        el.innerHTML = s.count
+            ? `評價：<span class="stars">${"★".repeat(Math.round(s.average))}${"☆".repeat(5 - Math.round(s.average))}</span> ${s.average}（${s.count} 則）`
+            : "尚無評價";
+    }
+
+    const tabs = document.querySelectorAll(".tabs a[href^='#']");
+    function setActiveTab(hash) {
+        tabs.forEach((tab) => tab.classList.toggle("is-active", tab.getAttribute("href") === hash));
+    }
+    tabs.forEach((tab) => {
+        tab.addEventListener("click", (e) => {
+            const hash = tab.getAttribute("href");
+            const target = document.querySelector(hash);
+            if (!target) return;
+            e.preventDefault();
+            setActiveTab(hash);
+            history.pushState(null, "", hash);
+            target.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+    });
+    setActiveTab(location.hash || "#section-walks");
+
+    const listEl = document.getElementById("walk-list");
+
+    function renderWalks() {
+        const walks = Walks.byWalker(user.id);
+        if (!walks.length) {
+            listEl.innerHTML = `<p class="empty">還沒有申請。去 <a href="dogs.html" style="color:#ff7b00;">可愛狗狗</a> 找毛孩吧！</p>`;
+            return;
+        }
+
+        listEl.innerHTML = walks.map((w) => {
+            let actions = "";
+            if (w.status === "pending") {
+                actions = `<button type="button" class="btn-danger" data-status="cancelled" data-id="${escapeHtml(w.id)}">取消申請</button>`;
+            } else if (w.status === "accepted") {
+                actions = `
+                    <button type="button" class="btn-primary" data-status="completed" data-id="${escapeHtml(w.id)}">標記完成</button>
+                    <button type="button" class="btn-danger" data-status="cancelled" data-id="${escapeHtml(w.id)}">取消行程</button>
+                `;
+            }
+
+            let rateHtml = "";
+            if (w.status === "completed") {
+                if (w.walkerRating) {
+                    rateHtml = `<div class="rate-box"><p>你給主人的評價：<span class="stars">${"★".repeat(w.walkerRating.score)}</span> ${escapeHtml(w.walkerRating.comment || "")}</p></div>`;
+                } else {
+                    rateHtml = `
+                        <div class="rate-box">
+                            <label>評價主人（1–5 星）</label>
+                            <select data-rate-score="${escapeHtml(w.id)}">
+                                <option value="5">5 星</option>
+                                <option value="4">4 星</option>
+                                <option value="3">3 星</option>
+                                <option value="2">2 星</option>
+                                <option value="1">1 星</option>
+                            </select>
+                            <input data-rate-comment="${escapeHtml(w.id)}" placeholder="選填留言" maxlength="200">
+                            <button type="button" class="btn-primary" data-rate="${escapeHtml(w.id)}">送出評價</button>
+                        </div>
+                    `;
+                }
+                if (w.ownerRating) {
+                    rateHtml += `<div class="rate-box"><p>主人給你的評價：<span class="stars">${"★".repeat(w.ownerRating.score)}</span> ${escapeHtml(w.ownerRating.comment || "")}</p></div>`;
+                }
+            }
+
+            return `
+                <article class="walk-card">
+                    <img src="${escapeHtml(w.dogImage)}" alt="${escapeHtml(w.dogName)}">
+                    <div>
+                        <h4>
+                            ${escapeHtml(w.dogName)}
+                            <span class="status-pill status-${escapeHtml(w.status)}">${escapeHtml(Walks.statusLabel(w.status))}</span>
+                        </h4>
+                        <p>主人：${escapeHtml(w.ownerName)} · 希望時段：${escapeHtml(w.preferredTime)}</p>
+                        <div class="msg-text">${escapeHtml(w.message)}</div>
+                        <p><a href="dog.html?id=${encodeURIComponent(w.dogId)}" style="color:#ff7b00;">查看狗狗</a></p>
+                        <div class="walk-actions">${actions}</div>
+                        ${rateHtml}
+                    </div>
+                </article>
+            `;
+        }).join("");
+    }
+
+    listEl.addEventListener("click", (e) => {
+        const statusBtn = e.target.closest("[data-status]");
+        const rateBtn = e.target.closest("[data-rate]");
+
+        if (statusBtn) {
+            const id = statusBtn.getAttribute("data-id");
+            const next = statusBtn.getAttribute("data-status");
+            if (next === "cancelled" && !confirm("確定取消？")) return;
+            if (next === "completed" && !confirm("確認這次遛狗已完成？")) return;
+            const result = Walks.setStatus(id, user.id, next);
+            if (!result.ok) {
+                alert(result.error);
+                return;
+            }
+            renderWalks();
+            refreshRating();
+            return;
+        }
+
+        if (rateBtn) {
+            const id = rateBtn.getAttribute("data-rate");
+            const score = document.querySelector(`[data-rate-score="${id}"]`).value;
+            const comment = document.querySelector(`[data-rate-comment="${id}"]`).value;
+            const result = Walks.rate(id, user.id, { score, comment });
+            if (!result.ok) {
+                alert(result.error);
+                return;
+            }
+            renderWalks();
+            refreshRating();
+        }
+    });
+
+    // settings
+    const profileForm = document.getElementById("profile-form");
+    const passwordForm = document.getElementById("password-form");
+    const profileMsg = document.getElementById("profile-msg");
+    const passwordMsg = document.getElementById("password-msg");
+
+    function fillProfile() {
+        const u = Auth.currentUser();
+        document.getElementById("profile-name").value = u.name || "";
+        document.getElementById("profile-email").value = u.email || "";
+        document.getElementById("profile-phone").value = u.phone || "";
+        document.getElementById("profile-area").value = u.area || "";
+    }
+
+    profileForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        clearMsg(profileMsg);
+        const result = Auth.updateProfile({
+            name: document.getElementById("profile-name").value,
+            phone: document.getElementById("profile-phone").value,
+            area: document.getElementById("profile-area").value
+        });
+        if (!result.ok) {
+            showMsg(profileMsg, result.error, false);
+            return;
+        }
+        showMsg(profileMsg, "個人資料已儲存。", true);
+        document.getElementById("welcome-title").textContent = result.user.name + " 的遛狗員中心";
+        const link = document.querySelector(".nav-user-link");
+        if (link) link.textContent = result.user.name + "（遛狗員）";
+    });
+
+    passwordForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        clearMsg(passwordMsg);
+        const result = await Auth.changePassword({
+            currentPassword: document.getElementById("current-password").value,
+            newPassword: document.getElementById("new-password").value
+        });
+        if (!result.ok) {
+            showMsg(passwordMsg, result.error, false);
+            return;
+        }
+        passwordForm.reset();
+        showMsg(passwordMsg, "密碼已更新。", true);
+    });
+
+    fillProfile();
+    refreshRating();
+    renderWalks();
+})();
+</script>
+</body>
+</html>
