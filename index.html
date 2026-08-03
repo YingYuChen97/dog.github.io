@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PawWalk - 遛狗媒合平台</title>
+<link rel="stylesheet" href="css/auth.css">
 
 <style>
 *{
@@ -28,6 +29,11 @@ header{
 
 header h1{
     font-size:30px;
+}
+
+header h1 a{
+    color:white;
+    text-decoration:none;
 }
 
 nav a{
@@ -74,16 +80,43 @@ nav a{
     font-size:18px;
 }
 
+.btn-outline{
+    background:white;
+    color:#ff914d;
+    border:2px solid #ff914d;
+    padding:10px 22px;
+    border-radius:30px;
+    text-decoration:none;
+    font-size:16px;
+    font-weight:bold;
+    display:inline-block;
+    transition:.2s;
+}
+
+.btn-outline:hover{
+    background:#ff914d;
+    color:white;
+}
+
 .section{
     width:90%;
     max-width:1200px;
     margin:60px auto;
 }
 
-.section h2{
-    text-align:center;
+.section-head{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    align-items:center;
+    gap:16px;
     margin-bottom:35px;
+}
+
+.section-head h2{
+    margin:0;
     color:#444;
+    text-align:center;
 }
 
 .cards{
@@ -98,6 +131,13 @@ nav a{
     overflow:hidden;
     box-shadow:0 5px 15px rgba(0,0,0,.15);
     transition:.3s;
+}
+
+.card-link{
+    display:block;
+    color:inherit;
+    text-decoration:none;
+    cursor:pointer;
 }
 
 .card:hover{
@@ -150,19 +190,30 @@ footer{
     text-align:center;
     padding:30px;
 }
+
+@media (max-width:640px){
+    header{
+        flex-direction:column;
+        gap:12px;
+        text-align:center;
+    }
+    nav a{
+        margin:0 10px;
+    }
+}
 </style>
 
 </head>
 <body>
 
 <header>
-    <h1>🐶 PawWalk</h1>
+    <h1><a href="index.html">🐶 PawWalk</a></h1>
 
-    <nav>
-        <a href="#">首頁</a>
-        <a href="#">尋找遛狗員</a>
-        <a href="#">成為遛狗員</a>
-        <a href="#">登入</a>
+    <nav id="main-nav">
+        <a href="index.html">首頁</a>
+        <a href="dogs.html">可愛狗狗</a>
+        <a href="community.html">狗社群</a>
+        <span data-auth-slot></span>
     </nav>
 </header>
 
@@ -171,51 +222,19 @@ footer{
 <div class="hero-text">
     <h2>找到最適合的遛狗夥伴</h2>
     <p>主人安心上班，狗狗快樂散步。</p>
-    <a class="btn" href="#">立即開始</a>
+    <a class="btn" href="register.html">立即開始</a>
 </div>
 
 </section>
 
 <section class="section">
 
-<h2>今日可愛狗狗</h2>
-
-<div class="cards">
-
-<div class="card">
-<img src="images/sample1.jpg" alt="sample1">
-<div class="card-content">
-<h3>Lucky 🐕</h3>
-<p>
-黃金獵犬，3歲。<br>
-喜歡公園散步、愛玩球。
-</p>
-</div>
+<div class="section-head">
+    <h2>今日可愛狗狗</h2>
+    <a class="btn-outline" href="dogs.html">顯示更多</a>
 </div>
 
-<div class="card">
-<img src="images/sample2.jpg" alt="sample1">
-<div class="card-content">
-<h3>Cookie 🐶</h3>
-<p>
-柯基犬，2歲。<br>
-喜歡慢跑和吃零食。
-</p>
-</div>
-</div>
-
-<div class="card">
-<img src="images/sample3.jpg" alt="sample1">
-<div class="card-content">
-<h3>Mochi 🐕</h3>
-<p>
-柴犬，4歲。<br>
-喜歡探索新地方。
-</p>
-</div>
-</div>
-
-</div>
+<div class="cards" id="featured-dogs"></div>
 
 </section>
 
@@ -242,7 +261,17 @@ footer{
 <div class="box">
 <h3>⭐ 評價制度</h3>
 <p>
-雙方互相評價，建立安心可靠的平台。
+行程完成後雙方互評，累積可信分數。
+</p>
+</div>
+
+<div class="box">
+<h3>📸 狗社群</h3>
+<p>
+分享毛孩照片，大家一起按讚留言。
+</p>
+<p style="margin-top:14px;">
+<a class="btn-outline" href="community.html" style="font-size:14px;padding:8px 16px;">逛社群</a>
 </p>
 </div>
 
@@ -258,5 +287,17 @@ footer{
 
 </footer>
 
+<script src="js/listings.js"></script>
+<script src="data/dogs.js"></script>
+<script src="js/dogs-ui.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/nav-auth.js"></script>
+<script>
+DogsUI.render(
+    document.getElementById("featured-dogs"),
+    DogData.featured(3),
+    "simple"
+);
+</script>
 </body>
 </html>
