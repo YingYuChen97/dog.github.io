@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>狗狗詳情 - PawWalk</title>
+<link rel="stylesheet" href="css/auth.css">
+<link rel="stylesheet" href="css/walks.css">
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:"Microsoft JhengHei",sans-serif;
+}
+body{ background:#f8f9fa; }
+header{
+    background:#ff914d;
+    color:white;
+    padding:20px 8%;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+header h1{ font-size:30px; }
+header h1 a{ color:white; text-decoration:none; }
+nav a{
+    color:white;
+    text-decoration:none;
+    margin-left:25px;
+    font-weight:bold;
+}
+.page{
+    width:90%;
+    max-width:900px;
+    margin:36px auto 60px;
+}
+.back-link{
+    display:inline-block;
+    color:#ff7b00;
+    text-decoration:none;
+    font-weight:bold;
+    margin-bottom:16px;
+}
+.detail-card{
+    background:white;
+    border-radius:16px;
+    box-shadow:0 5px 15px rgba(0,0,0,.1);
+    overflow:hidden;
+}
+.detail-layout{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+}
+.detail-layout img{
+    width:100%;
+    height:100%;
+    min-height:320px;
+    object-fit:cover;
+    background:#f3f3f3;
+}
+.detail-body{ padding:28px; }
+.detail-body h2{
+    color:#ff914d;
+    font-size:28px;
+    margin-bottom:8px;
+}
+.meta-line{
+    color:#777;
+    font-size:14px;
+    margin-bottom:14px;
+}
+.tag-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    margin-bottom:14px;
+}
+.tag{
+    background:#f1f3f5;
+    color:#555;
+    font-size:12px;
+    padding:4px 8px;
+    border-radius:6px;
+}
+.detail-body p{
+    color:#555;
+    line-height:1.65;
+    margin-bottom:12px;
+}
+.dog-meta{
+    list-style:none;
+    border-top:1px solid #f0f0f0;
+    padding-top:14px;
+    margin-top:8px;
+}
+.dog-meta li{
+    color:#555;
+    font-size:14px;
+    line-height:1.5;
+    margin-bottom:8px;
+}
+.dog-meta strong{
+    display:inline-block;
+    min-width:42px;
+    color:#888;
+    margin-right:6px;
+}
+.owner-actions{
+    display:none;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-top:20px;
+}
+.owner-actions.show{ display:flex; }
+.btn-primary,.btn-secondary,.btn-danger{
+    border:none;
+    border-radius:30px;
+    padding:12px 22px;
+    font:inherit;
+    font-weight:bold;
+    cursor:pointer;
+}
+.btn-primary{ background:#ff914d; color:white; }
+.btn-secondary{ background:#f1f3f5; color:#444; }
+.btn-danger{ background:#fff0f0; color:#c0392b; }
+.edit-panel{
+    display:none;
+    margin-top:24px;
+    background:white;
+    border-radius:16px;
+    box-shadow:0 5px 15px rgba(0,0,0,.1);
+    padding:28px;
+}
+.edit-panel.show{ display:block; }
+.edit-panel h3{
+    color:#444;
+    margin-bottom:6px;
+}
+.hint{
+    color:#888;
+    font-size:14px;
+    margin-bottom:18px;
+}
+.form-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px 18px;
+}
+.form-grid .full{ grid-column:1 / -1; }
+.form-group label{
+    display:block;
+    margin-bottom:6px;
+    color:#444;
+    font-weight:bold;
+    font-size:14px;
+}
+.form-group input,
+.form-group select,
+.form-group textarea{
+    width:100%;
+    padding:12px 14px;
+    border:1px solid #ddd;
+    border-radius:10px;
+    font:inherit;
+    font-size:15px;
+    background:white;
+}
+.form-group textarea{
+    min-height:84px;
+    resize:vertical;
+}
+.form-actions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-top:14px;
+}
+.msg{
+    border-radius:8px;
+    padding:10px 12px;
+    margin-bottom:14px;
+    font-size:14px;
+    display:none;
+}
+.msg.show{ display:block; }
+.msg.ok{ background:#eefaf1; color:#1e7e34; border:1px solid #c3e6cb; }
+.msg.err{ background:#fff0f0; color:#c0392b; border:1px solid #f5c6cb; }
+.empty-state{
+    text-align:center;
+    background:white;
+    border-radius:16px;
+    padding:48px 20px;
+    color:#777;
+    box-shadow:0 5px 15px rgba(0,0,0,.08);
+}
+footer{
+    margin-top:40px;
+    background:#333;
+    color:white;
+    text-align:center;
+    padding:30px;
+}
+@media (max-width:720px){
+    header{ flex-direction:column; gap:12px; text-align:center; }
+    nav a{ margin:0 10px; }
+    .detail-layout{ grid-template-columns:1fr; }
+    .detail-layout img{ min-height:220px; }
+    .form-grid{ grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+
+<header>
+    <h1><a href="index.html">🐶 PawWalk</a></h1>
+    <nav id="main-nav">
+        <a href="index.html">首頁</a>
+        <a href="dogs.html">可愛狗狗</a>
+        <a href="community.html">狗社群</a>
+        <span data-auth-slot></span>
+    </nav>
+</header>
+
+<main class="page">
+    <a class="back-link" href="dogs.html">← 回可愛狗狗</a>
+    <div id="content"></div>
+</main>
+
+<footer>
+    <p>© 2026 PawWalk 遛狗媒合平台</p>
+</footer>
+
+<script src="js/listings.js"></script>
+<script src="data/dogs.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/walks.js"></script>
+<script src="js/nav-auth.js"></script>
+<script>
+(function () {
+    const params = new URLSearchParams(location.search);
+    const id = params.get("id");
+    const content = document.getElementById("content");
+    const user = Auth.currentUser();
+
+    function escapeHtml(str) {
+        return String(str == null ? "" : str)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;");
+    }
+
+    function showMsg(el, text, ok) {
+        el.textContent = text;
+        el.className = "msg show " + (ok ? "ok" : "err");
+    }
+
+    if (!id) {
+        content.innerHTML = `<div class="empty-state"><p>找不到這隻狗狗。</p><p style="margin-top:12px;"><a href="dogs.html">回列表</a></p></div>`;
+        return;
+    }
+
+    let dog = DogData.byId(id);
+    if (!dog) {
+        content.innerHTML = `<div class="empty-state"><p>找不到這隻狗狗，可能已下架。</p><p style="margin-top:12px;"><a href="dogs.html">回列表</a></p></div>`;
+        return;
+    }
+
+    const isOwner = !!(user && dog.ownerId && user.id === dog.ownerId && user.role === "owner");
+
+    function tagsHtml(tags) {
+        if (!tags || !tags.length) return "";
+        return `<div class="tag-row">${tags.map((t) => `<span class="tag">${escapeHtml(t)}</span>`).join("")}</div>`;
+    }
+
+    function render() {
+        dog = DogData.byId(id);
+        if (!dog) {
+            content.innerHTML = `<div class="empty-state"><p>這筆刊登已刪除。</p><p style="margin-top:12px;"><a href="owner.html#section-mine">回我的刊登</a></p></div>`;
+            return;
+        }
+
+        const w = dog.walkNeed || {};
+        document.title = dog.name + " - PawWalk";
+
+        content.innerHTML = `
+            <article class="detail-card" id="view-panel">
+                <div class="detail-layout">
+                    <img src="${escapeHtml(dog.image)}" alt="${escapeHtml(dog.name)}">
+                    <div class="detail-body">
+                        <h2>${escapeHtml(dog.name)}</h2>
+                        <p class="meta-line">
+                            ${escapeHtml(dog.breed)} · ${dog.age}歲 · ${escapeHtml(dog.gender)} ·
+                            ${escapeHtml(dog.size)} · 活力${escapeHtml(dog.energy)} · ${escapeHtml(dog.location)}
+                        </p>
+                        ${tagsHtml(dog.tags)}
+                        <p>${escapeHtml(dog.bio)}</p>
+                        <ul class="dog-meta">
+                            <li><strong>性情</strong>${escapeHtml(dog.temperament)}</li>
+                            <li><strong>散步</strong>約 ${w.durationMin || "—"} 分鐘 · ${escapeHtml(w.frequency || "—")} · 偏好${escapeHtml(w.preferredTime || "—")}</li>
+                            <li><strong>注意</strong>${escapeHtml(dog.notes)}</li>
+                        </ul>
+                        <div class="owner-actions ${isOwner ? "show" : ""}">
+                            <button type="button" class="btn-primary" id="btn-edit">編輯</button>
+                            <button type="button" class="btn-danger" id="btn-delete">刪除刊登</button>
+                            <a class="btn-secondary" href="owner.html#section-mine" style="text-decoration:none;display:inline-flex;align-items:center;">回我的刊登</a>
+                        </div>
+                        <div class="apply-box" id="apply-box"></div>
+                    </div>
+                </div>
+            </article>
+
+            <section class="edit-panel" id="edit-panel">
+                <h3>編輯刊登</h3>
+                <p class="hint">修改後按「儲存」即可更新。</p>
+                <div class="msg" id="edit-msg"></div>
+                <form id="edit-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="dog-name">名字</label>
+                            <input id="dog-name" required maxlength="30">
+                        </div>
+                        <div class="form-group">
+                            <label for="dog-breed">品種</label>
+                            <input id="dog-breed" required maxlength="40">
+                        </div>
+                        <div class="form-group">
+                            <label for="dog-age">年齡（歲）</label>
+                            <input id="dog-age" type="number" min="0" max="30" step="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="dog-gender">性別</label>
+                            <select id="dog-gender">
+                                <option value="公">公</option>
+                                <option value="母">母</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="dog-size">體型</label>
+                            <select id="dog-size">
+                                <option value="小型">小型</option>
+                                <option value="中型">中型</option>
+                                <option value="大型">大型</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="dog-energy">活力</label>
+                            <select id="dog-energy">
+                                <option value="低">低</option>
+                                <option value="中">中</option>
+                                <option value="高">高</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="dog-location">活動地區</label>
+                            <input id="dog-location" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="dog-image">照片</label>
+                            <select id="dog-image">
+                                <option value="images/sample1.jpg">樣張 1</option>
+                                <option value="images/sample2.jpg">樣張 2</option>
+                                <option value="images/sample3.jpg">樣張 3</option>
+                            </select>
+                        </div>
+                        <div class="form-group full">
+                            <label for="dog-tags">標籤（用逗號分隔）</label>
+                            <input id="dog-tags">
+                        </div>
+                        <div class="form-group full">
+                            <label for="dog-bio">簡短介紹</label>
+                            <textarea id="dog-bio" required></textarea>
+                        </div>
+                        <div class="form-group full">
+                            <label for="dog-temperament">性情</label>
+                            <textarea id="dog-temperament"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="dog-duration">散步時長（分鐘）</label>
+                            <input id="dog-duration" type="number" min="10" max="180">
+                        </div>
+                        <div class="form-group">
+                            <label for="dog-frequency">頻率</label>
+                            <input id="dog-frequency">
+                        </div>
+                        <div class="form-group">
+                            <label for="dog-time">偏好時段</label>
+                            <input id="dog-time">
+                        </div>
+                        <div class="form-group full">
+                            <label for="dog-notes">給遛狗員的注意事項</label>
+                            <textarea id="dog-notes"></textarea>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary">儲存修改</button>
+                        <button type="button" class="btn-secondary" id="btn-cancel-edit">取消</button>
+                    </div>
+                </form>
+            </section>
+        `;
+
+        bindOwnerActions();
+        bindApplyBox();
+    }
+
+    function bindApplyBox() {
+        const box = document.getElementById("apply-box");
+        if (!box) return;
+
+        if (isOwner) {
+            box.innerHTML = "";
+            return;
+        }
+
+        if (!dog.ownerId) {
+            box.innerHTML = `<p class="hint" style="color:#888;font-size:14px;">此為示範刊登，無法送出遛狗申請。</p>`;
+            return;
+        }
+
+        if (!user) {
+            box.innerHTML = `
+                <h3>想陪伴這隻狗狗？</h3>
+                <p style="color:#666;font-size:14px;margin-bottom:10px;">登入遛狗員帳號後即可送出申請。</p>
+                <a class="btn-primary" href="login.html" style="text-decoration:none;display:inline-block;">前往登入</a>
+            `;
+            return;
+        }
+
+        if (user.role !== "walker") {
+            box.innerHTML = `
+                <h3>遛狗申請</h3>
+                <p style="color:#666;font-size:14px;">申請功能僅供遛狗員使用。你目前是主人帳號。</p>
+            `;
+            return;
+        }
+
+        const mine = Walks.byWalker(user.id).filter(
+            (w) => w.dogId === dog.id && (w.status === "pending" || w.status === "accepted")
+        );
+        if (mine.length) {
+            const w = mine[0];
+            box.innerHTML = `
+                <h3>遛狗申請</h3>
+                <p style="color:#666;font-size:14px;">
+                    你已送出申請
+                    <span class="status-pill status-${escapeHtml(w.status)}">${escapeHtml(Walks.statusLabel(w.status))}</span>
+                    ，可到 <a href="walker.html" style="color:#ff7b00;font-weight:bold;">遛狗員中心</a> 查看。
+                </p>
+            `;
+            return;
+        }
+
+        box.innerHTML = `
+            <h3>申請遛狗</h3>
+            <p style="color:#666;font-size:14px;margin-bottom:10px;">主人審核通過後即可安排散步。</p>
+            <div class="msg" id="apply-msg"></div>
+            <form id="apply-form">
+                <label for="apply-time" style="display:block;font-size:13px;font-weight:bold;margin-bottom:4px;">希望時段</label>
+                <input id="apply-time" placeholder="例如：平日傍晚 6–7 點" maxlength="80">
+                <label for="apply-message" style="display:block;font-size:13px;font-weight:bold;margin-bottom:4px;">自我介紹／申請說明</label>
+                <textarea id="apply-message" required maxlength="300" placeholder="簡單介紹遛狗經驗、可配合的時間…"></textarea>
+                <button type="submit" class="btn-primary">送出申請</button>
+            </form>
+        `;
+
+        document.getElementById("apply-form").addEventListener("submit", (e) => {
+            e.preventDefault();
+            const msgEl = document.getElementById("apply-msg");
+            const result = Walks.apply({
+                dog,
+                walker: user,
+                preferredTime: document.getElementById("apply-time").value,
+                message: document.getElementById("apply-message").value
+            });
+            if (!result.ok) {
+                showMsg(msgEl, result.error, false);
+                return;
+            }
+            showMsg(msgEl, "申請已送出！請等待主人審核。", true);
+            render();
+        });
+    }
+
+    function fillForm() {
+        document.getElementById("dog-name").value = dog.name || "";
+        document.getElementById("dog-breed").value = dog.breed || "";
+        document.getElementById("dog-age").value = dog.age;
+        document.getElementById("dog-gender").value = dog.gender || "公";
+        document.getElementById("dog-size").value = dog.size || "中型";
+        document.getElementById("dog-energy").value = dog.energy || "中";
+        document.getElementById("dog-location").value = dog.location || "";
+        const imgSel = document.getElementById("dog-image");
+        const image = dog.image || "images/sample1.jpg";
+        if (![...imgSel.options].some((o) => o.value === image)) {
+            const opt = document.createElement("option");
+            opt.value = image;
+            opt.textContent = "目前照片";
+            imgSel.appendChild(opt);
+        }
+        imgSel.value = image;
+        document.getElementById("dog-tags").value = (dog.tags || []).join("、");
+        document.getElementById("dog-bio").value = dog.bio || "";
+        document.getElementById("dog-temperament").value = dog.temperament || "";
+        document.getElementById("dog-duration").value = (dog.walkNeed && dog.walkNeed.durationMin) || 30;
+        document.getElementById("dog-frequency").value = (dog.walkNeed && dog.walkNeed.frequency) || "";
+        document.getElementById("dog-time").value = (dog.walkNeed && dog.walkNeed.preferredTime) || "";
+        document.getElementById("dog-notes").value = dog.notes || "";
+    }
+
+    function bindOwnerActions() {
+        if (!isOwner) return;
+
+        const editPanel = document.getElementById("edit-panel");
+        const editMsg = document.getElementById("edit-msg");
+
+        document.getElementById("btn-edit").addEventListener("click", () => {
+            fillForm();
+            editMsg.className = "msg";
+            editPanel.classList.add("show");
+            editPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+
+        document.getElementById("btn-cancel-edit").addEventListener("click", () => {
+            editPanel.classList.remove("show");
+        });
+
+        document.getElementById("btn-delete").addEventListener("click", () => {
+            if (!confirm("確定要刪除「" + dog.name + "」的刊登嗎？")) return;
+            const result = Listings.remove(user.id, dog.id);
+            if (!result.ok) {
+                alert(result.error);
+                return;
+            }
+            window.location.href = "owner.html#section-mine";
+        });
+
+        document.getElementById("edit-form").addEventListener("submit", (e) => {
+            e.preventDefault();
+            const result = Listings.update(user.id, dog.id, {
+                name: document.getElementById("dog-name").value,
+                breed: document.getElementById("dog-breed").value,
+                age: document.getElementById("dog-age").value,
+                gender: document.getElementById("dog-gender").value,
+                size: document.getElementById("dog-size").value,
+                energy: document.getElementById("dog-energy").value,
+                location: document.getElementById("dog-location").value,
+                image: document.getElementById("dog-image").value,
+                tags: document.getElementById("dog-tags").value,
+                bio: document.getElementById("dog-bio").value,
+                temperament: document.getElementById("dog-temperament").value,
+                durationMin: document.getElementById("dog-duration").value,
+                frequency: document.getElementById("dog-frequency").value,
+                preferredTime: document.getElementById("dog-time").value,
+                notes: document.getElementById("dog-notes").value
+            });
+
+            if (!result.ok) {
+                showMsg(editMsg, result.error, false);
+                return;
+            }
+
+            editPanel.classList.remove("show");
+            render();
+            const actions = document.querySelector(".owner-actions");
+            if (actions) {
+                const tip = document.createElement("div");
+                tip.className = "msg show ok";
+                tip.style.marginTop = "14px";
+                tip.textContent = "已儲存修改。";
+                actions.insertAdjacentElement("beforebegin", tip);
+            }
+        });
+    }
+
+    // 主人中心連過來時，若帶 edit=1 直接開啟編輯
+    render();
+    if (isOwner && params.get("edit") === "1") {
+        document.getElementById("btn-edit").click();
+    }
+})();
+</script>
+</body>
+</html>
